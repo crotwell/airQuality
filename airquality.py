@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import serial, time, datetime, os, platform, sys, argparse
+import binascii
+
 ser = serial.Serial('/dev/ttyUSB0')
 dataPath = '/var/www/html/airquality/'
 sleeptime = 10 # seconds
@@ -26,9 +28,18 @@ if not args.quiet:
 while True:
     data = []
     nowTime = datetime.datetime.utcnow()
-    for i in range(0,10):
+    d = ser.read()
+    while d != b'\xaa':
+        print('read not AA: '+binascii.hexlify(d).decode("ascii"), file=sys.stderr)
+        d = ser.read()
+    data.append(d)
+    for i in range(1,10):
        d = ser.read()
        data.append(d)
+    if data[9] != b'\xab':
+        print('read tail not AB: '+binascii.hexlify(data[9]).decode("ascii"), file=sys.stderr)
+        continue
+
 
     pmtwofive = int.from_bytes(b''.join(data[2:4]), byteorder='little') /10
     pmten = int.from_bytes(b''.join(data[4:6]), byteorder='little') /10
