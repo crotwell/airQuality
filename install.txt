@@ -16,14 +16,22 @@ pi
 # to see options
 ./airquality.py -h
 
+# error messages from auto started script
+sudo journalctl -u airquality -f
+
+# check status
+sudo systemctl status airquality.service
+
 data will be available at (maybe changing ip):
 http://192.168.100.1/airquality
 in files like:
 http://192.168.100.1/airquality/data_airq01_2019_Oct_16.txt
 
 ######### to update code
+
 cd .airquality_auto
 git pull
+cp airquality.py ..
 
 # if need to stop it
 sudo systemctl stop airquality.service
