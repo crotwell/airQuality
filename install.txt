@@ -12,13 +12,64 @@ https://www.raspberrypi.org/blog/monitor-air-quality-with-a-raspberry-pi/
 
 pi
 ---------------
+
+# to see options
+./airquality.py -h
+
+data will be available at (maybe changing ip):
+http://192.168.100.1/airquality
+in files like:
+http://192.168.100.1/airquality/data_airq01_2019_Oct_16.txt
+
+######### to update code
+cd .airquality_auto
+git pull
+
+# if need to stop it
+sudo systemctl stop airquality.service
+
+
+# enable systemctl auto-start
+sudo cp .airQuality_auto/airquality.service /etc/systemd/system/.
+sudo systemctl enable airquality.service
+# can start now or wait for reboot
+sudo systemctl start airquality.service
+
+# check outputing data
+sudo systemctl status airquality.service
+tail -f /var/www/html/airquality/data_airq03_2019_Oct_16.txt
+
+######### custom image version
+
+#hostname
+sudo nano /etc/hostname
+
+# change passwd, channel (1-11) and ssid
+sudo nano /etc/hostapd/hostapd.conf
+
+# enable systemctl auto-start
+sudo cp .airQuality_auto/airquality.service /etc/systemd/system/.
+sudo systemctl enable airquality.service
+# can start now or wait for reboot
+sudo systemctl start airquality.service
+# if need to stop it
+sudo systemctl stop airquality.service
+
+
+
+##################
+
+
 sudo apt-get update
 sudo apt-get upgrade
 
-sudo apt-get install python3 python3-serial apache2 git
+sudo apt-get install -y python3 python3-serial apache2 git
 
 sudo mkdir /var/www/html/airquality
 sudo chown pi:pi /var/www/html/airquality
+
+# set hostname to airq01
+sudo vi /etc/hostname
 
 #scp python code to /home/pi/.airquality_auto
 git clone https://github.com/crotwell/airQuality.git
@@ -30,27 +81,11 @@ cd .airQuality_auto ; git pull ; cd ..
 # script for kids to play with
 cp .airQuality_auto/airquality.py  ~
 
-# to see options
-./airquality.py -h
-
-# enable systemctl auto-start
-sudo cp .airQuality_auto/airquality.service /etc/systemd/system/.
-sudo systemctl enable airquality.service
-# can start now or wait for reboot
-sudo systemctl start airquality.service
-# if need to stop it
-sudo systemctl stop airquality.service
-
-# check outputing data
-sudo systemctl status airquality.service
-tail -f /var/www/html/airquality/data_airq03_2019_Oct_16.txt
 
 
-data will be available at (maybe changing ip):
-http://192.168.100.1/airquality
-in files like:
-http://192.168.100.1/airquality/data_airq01_2019_Oct_16.txt
 
+
+########### below only if starting from raw rasbian image ###############
 
 raspi-config
   password
@@ -73,16 +108,42 @@ sudo raspi-config
 # stop at "Add routing and masquerade"
 # if get error:
 # Failed to restart hostapd.service: Unit hostapd.service is masked.
-sudo apt install dnsmasq hostapd
+sudo apt-get install -y dnsmasq hostapd
 sudo systemctl stop dnsmasq
 sudo systemctl stop hostapd
-# sudo nano /etc/dhcpcd.conf
-sudo service dhcpcd restart
+sudo nano /etc/dhcpcd.conf
+
+interface wlan0
+     static ip_address=192.168.100.1/24
+     nohook wpa_supplicant
+
+sudo systemctl restart dhcpcd
 sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
-sudo vi /etc/dnsmasq.conf
+sudo nano /etc/dnsmasq.conf
+
+interface=wlan0      # Use the require wireless interface - usually wlan0
+dhcp-range=192.168.100.2,192.168.100.200,255.255.255.0,24h
+
 sudo systemctl restart dnsmasq
-# sudo nano /etc/hostapd/hostapd.conf,
+
 # change passwd, channel (1-11) and ssid
+sudo nano /etc/hostapd/hostapd.conf
+
+interface=wlan0
+driver=nl80211
+ssid=AirQ-05
+hw_mode=g
+channel=5
+wmm_enabled=0
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+wpa=2
+wpa_passphrase=dirtyair!
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
+
 sudo systemctl unmask hostapd
 sudo systemctl enable hostapd
 sudo systemctl restart hostapd
