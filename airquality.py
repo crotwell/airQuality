@@ -3,7 +3,11 @@
 import serial, time, datetime, os, platform, sys, argparse
 import binascii
 
-ser = serial.Serial('/dev/ttyUSB0')
+usbFilename = '/dev/ttyUSB0'
+if not os.path.exists(usbFilename):
+    sys.exit('serial device '+usbFilename+' not found, quitting...')
+
+ser = serial.Serial(usbFilename)
 dataPath = '/var/www/html/airquality/'
 sleeptime = 10 # seconds
 host = platform.node()
