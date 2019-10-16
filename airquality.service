@@ -1,0 +1,14 @@
+[Unit]
+After=multi-user.target
+
+[Service]
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/.airQuality_auto
+Restart=always
+RestartSec=5
+Type=idle
+ExecStart=/usr/bin/python3  /home/pi/.airQuality_auto/airquality.py --quiet -s 10
+
+[Install]
+WantedBy=default.target

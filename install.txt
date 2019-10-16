@@ -1,0 +1,84 @@
+
+https://www.raspberrypi.org/downloads/raspbian/
+get Buster Lite
+
+balenaEtcher
+https://www.balena.io/etcher/
+
+
+howto link:
+SDS011
+https://www.raspberrypi.org/blog/monitor-air-quality-with-a-raspberry-pi/
+
+pi
+---------------
+sudo apt-get update
+sudo apt-get upgrade
+
+sudo apt-get install python3 python3-serial apache2
+
+sudo mkdir /var/www/html/airquality
+sudo chown pi:pi /var/www/html/airquality
+
+#scp python code to /home/pi/.airquality_auto
+scp -r airQuality pi@10.80.193.154:.airQuality_auto
+
+# script for kids to play with
+cp .airQuality_auto/airquality.py  ~
+
+# to see options
+./airquality.py -h
+
+# enable systemctl auto-start
+sudo cp .airQuality_auto/airquality.service /etc/systemd/system/.
+sudo systemctl enable airquality.service
+# can start now or wait for reboot
+sudo systemctl start airquality.service
+# if need to stop it
+sudo systemctl stop airquality.service
+
+# check outputing data
+sudo systemctl status airquality.service
+tail -f /var/www/html/airquality/data_airq03_2019_Oct_16.txt
+
+
+data will be available at (maybe changing ip):
+http://192.168.100.1/airquality
+in files like:
+http://192.168.100.1/airquality/data_airq01_2019_Oct_16.txt
+
+
+raspi-config
+  password
+  locale
+  keyboard
+  timezone
+  enable ssh
+  wifi country
+
+# force hdmi so can plug in monitor after boot
+# edit /boot/config.txt and uncomment line:
+# hdmi_force_hotplug=1
+
+# set wifi country to US
+sudo raspi-config
+# network options -> wi-fi
+
+# set up as wifi hotspot so laptop can connect
+# see https://www.raspberrypi.org/documentation/configuration/wireless/access-point.md
+# stop at "Add routing and masquerade"
+# if get error:
+# Failed to restart hostapd.service: Unit hostapd.service is masked.
+sudo apt install dnsmasq hostapd
+sudo systemctl stop dnsmasq
+sudo systemctl stop hostapd
+# sudo nano /etc/dhcpcd.conf
+sudo service dhcpcd restart
+sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
+sudo vi /etc/dnsmasq.conf
+sudo systemctl restart dnsmasq
+# sudo nano /etc/hostapd/hostapd.conf,
+# change passwd, channel (1-11) and ssid
+sudo systemctl unmask hostapd
+sudo systemctl enable hostapd
+sudo systemctl restart hostapd
