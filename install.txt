@@ -10,6 +10,9 @@ howto link:
 SDS011
 https://www.raspberrypi.org/blog/monitor-air-quality-with-a-raspberry-pi/
 
+Another code (aqi.py) python2:
+https://github.com/zefanja/aqi
+
 pi
 ---------------
 
