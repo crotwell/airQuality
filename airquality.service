@@ -8,7 +8,7 @@ WorkingDirectory=/home/pi/.airQuality_auto
 Restart=always
 RestartSec=5
 Type=idle
-ExecStart=/usr/bin/python3  /home/pi/.airQuality_auto/airquality.py --quiet -s 10
+ExecStart=/usr/bin/python2  /home/pi/aqi.py
 
 [Install]
 WantedBy=default.target

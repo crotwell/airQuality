@@ -1,0 +1,14 @@
+scp -r aqi.py airquality.service www pi@192.168.100.1:.
+
+ sudo apt install python-serial
+
+sudo cp airquality.service /etc/systemd/system/.
+
+sudo systemctl enable airquality
+sudo systemctl restart airquality
+# just to check start is ok
+sudo systemctl status airquality
+
+
+# check for csv file, may take tens od seconds for first one to show up
+ls /var/www/html/airquality/
